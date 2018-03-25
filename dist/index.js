@@ -73,11 +73,88 @@ return /******/ (function(modules) { // webpackBootstrap
 /******/ 	__webpack_require__.p = "/dist/";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 3);
+/******/ 	return __webpack_require__(__webpack_require__.s = 4);
 /******/ })
 /************************************************************************/
 /******/ ([
 /* 0 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var DynaTextCompress_1 = __webpack_require__(1);
+var DynaObjectCompress = /** @class */ (function () {
+    function DynaObjectCompress(objectPattern, commonTexts, forEncode, compressSymbol) {
+        if (commonTexts === void 0) { commonTexts = []; }
+        if (forEncode === void 0) { forEncode = true; }
+        if (compressSymbol === void 0) { compressSymbol = "!"; }
+        this.compressSymbol = compressSymbol;
+        this.textCompressor = new DynaTextCompress_1.DynaTextCompress(this.getCommonTexts(objectPattern, commonTexts)
+            .concat(forEncode ? [
+            '",',
+            '{',
+            '"},',
+            '},',
+            '}',
+            '[',
+            '"],',
+            '],',
+            '}',
+        ] : []), forEncode, compressSymbol);
+    }
+    DynaObjectCompress.prototype.compress = function (obj) {
+        return this.textCompressor.compress(JSON.stringify(obj));
+    };
+    DynaObjectCompress.prototype.decompress = function (compressed) {
+        var obj;
+        var result = this.textCompressor.decompress(compressed);
+        if (result.errors.length === 0) {
+            obj = JSON.parse(result.text);
+        }
+        return {
+            obj: obj,
+            errors: result.errors,
+        };
+    };
+    DynaObjectCompress.prototype.getCommonTexts = function (obj, userCommonTexts) {
+        var commonTexts = [];
+        var _getProperties = function (obj) {
+            if (obj == null)
+                return;
+            else if (obj instanceof Date)
+                return;
+            else if (Array.isArray(obj))
+                obj.forEach(_getProperties);
+            else if (typeof obj === "object") {
+                commonTexts = commonTexts.concat(Object.keys(obj).map(function (key) {
+                    if (Array.isArray(obj[key]))
+                        return "\"" + key + "\":[";
+                    if (typeof obj[key] !== "number")
+                        return "\"" + key + "\":\"";
+                    return "\"" + key + "\":";
+                }));
+                Object.keys(obj).forEach(function (key) { return _getProperties(obj[key]); });
+            }
+        };
+        _getProperties(obj);
+        return commonTexts
+            .concat(userCommonTexts)
+            .reduce(function (acc, text) {
+            if (acc.indexOf(text) === -1)
+                acc.push(text);
+            return acc;
+        }, [])
+            .sort(function (aText, bText) { return aText.length - bText.length; })
+            .reverse();
+    };
+    return DynaObjectCompress;
+}());
+exports.DynaObjectCompress = DynaObjectCompress;
+
+
+/***/ }),
+/* 1 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -159,100 +236,75 @@ exports.DynaTextCompress = DynaTextCompress;
 
 
 /***/ }),
-/* 1 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-Object.defineProperty(exports, "__esModule", { value: true });
-var DynaTextCompress_1 = __webpack_require__(0);
-exports.DynaTextCompress = DynaTextCompress_1.DynaTextCompress;
-var DynaObjectCompress_1 = __webpack_require__(2);
-exports.DynaObjectCompress = DynaObjectCompress_1.DynaObjectCompress;
-
-
-/***/ }),
 /* 2 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
 Object.defineProperty(exports, "__esModule", { value: true });
-var DynaTextCompress_1 = __webpack_require__(0);
-var DynaObjectCompress = /** @class */ (function () {
-    function DynaObjectCompress(objectPattern, commonTexts, forEncode, compressSymbol) {
-        if (commonTexts === void 0) { commonTexts = []; }
-        if (forEncode === void 0) { forEncode = true; }
-        if (compressSymbol === void 0) { compressSymbol = "!"; }
-        this.compressSymbol = compressSymbol;
-        this.textCompressor = new DynaTextCompress_1.DynaTextCompress(this.getCommonTexts(objectPattern, commonTexts)
-            .concat(forEncode ? [
-            '",',
-            '{',
-            '"},',
-            '},',
-            '}',
-            '[',
-            '"],',
-            '],',
-            '}',
-        ] : []), forEncode, compressSymbol);
-    }
-    DynaObjectCompress.prototype.compress = function (obj) {
-        return this.textCompressor.compress(JSON.stringify(obj));
-    };
-    DynaObjectCompress.prototype.decompress = function (compressed) {
-        var obj;
-        var result = this.textCompressor.decompress(compressed);
-        if (result.errors.length === 0) {
-            obj = JSON.parse(result.text);
-        }
-        return {
-            obj: obj,
-            errors: result.errors,
-        };
-    };
-    DynaObjectCompress.prototype.getCommonTexts = function (obj, userCommonTexts) {
-        var commonTexts = [];
-        var _getProperties = function (obj) {
-            if (obj == null)
-                return;
-            else if (obj instanceof Date)
-                return;
-            else if (Array.isArray(obj))
-                obj.forEach(_getProperties);
-            else if (typeof obj === "object") {
-                commonTexts = commonTexts.concat(Object.keys(obj).map(function (key) {
-                    if (Array.isArray(obj[key]))
-                        return "\"" + key + "\":[";
-                    if (typeof obj[key] !== "number")
-                        return "\"" + key + "\":\"";
-                    return "\"" + key + "\":";
-                }));
-                Object.keys(obj).forEach(function (key) { return _getProperties(obj[key]); });
-            }
-        };
-        _getProperties(obj);
-        return commonTexts
-            .concat(userCommonTexts)
-            .reduce(function (acc, text) {
-            if (acc.indexOf(text) === -1)
-                acc.push(text);
-            return acc;
-        }, [])
-            .sort(function (aText, bText) { return aText.length - bText.length; })
-            .reverse();
-    };
-    return DynaObjectCompress;
-}());
-exports.DynaObjectCompress = DynaObjectCompress;
+var DynaTextCompress_1 = __webpack_require__(1);
+exports.DynaTextCompress = DynaTextCompress_1.DynaTextCompress;
+var DynaObjectCompress_1 = __webpack_require__(0);
+exports.DynaObjectCompress = DynaObjectCompress_1.DynaObjectCompress;
+var DynaObjectCompressVersion_1 = __webpack_require__(3);
+exports.DynaObjectCompressVersion = DynaObjectCompressVersion_1.DynaObjectCompressVersion;
 
 
 /***/ }),
 /* 3 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(1);
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+var DynaObjectCompress_1 = __webpack_require__(0);
+var DynaObjectCompressVersion = /** @class */ (function () {
+    function DynaObjectCompressVersion(versionCompressConfig, forEncode, compressSymbol) {
+        if (forEncode === void 0) { forEncode = true; }
+        if (compressSymbol === void 0) { compressSymbol = "!"; }
+        var _this = this;
+        this.compressSymbol = compressSymbol;
+        this.compressors = {};
+        Object.keys(versionCompressConfig).forEach(function (version) {
+            if (version.indexOf(compressSymbol) > -1) {
+                throw Error("DynaObjectVCompress: \"version\" cannot contain the \"compressSymbol\", version: \"" + version + "\"");
+            }
+            _this.compressors[version] = new DynaObjectCompress_1.DynaObjectCompress(versionCompressConfig[version].objectPattern, versionCompressConfig[version].commonTexts, forEncode, compressSymbol);
+        });
+    }
+    DynaObjectCompressVersion.prototype.compress = function (version, obj) {
+        if (!this.compressors[version]) {
+            console.error("DynaObjectVCompress.compress: " + version + " is not supported, there is no versionCompressConfig for this version");
+            return '';
+        }
+        return "" + version + this.compressSymbol + this.compressors[version].compress(obj);
+    };
+    DynaObjectCompressVersion.prototype.decompress = function (compressed) {
+        var version = compressed.substr(0, compressed.indexOf(this.compressSymbol));
+        if (!version) {
+            return {
+                obj: null,
+                errors: ["Cannot get the version from this compressed content"],
+            };
+        }
+        if (!this.compressors[version]) {
+            return {
+                obj: null,
+                errors: ["There is versionCompressConfig for this version: \"" + version + "\""],
+            };
+        }
+        return this.compressors[version].decompress(compressed.substr(compressed.indexOf(this.compressSymbol) + this.compressSymbol.length));
+    };
+    return DynaObjectCompressVersion;
+}());
+exports.DynaObjectCompressVersion = DynaObjectCompressVersion;
+
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports, __webpack_require__) {
+
+module.exports = __webpack_require__(2);
 
 
 /***/ })
