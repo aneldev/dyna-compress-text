@@ -174,6 +174,178 @@ describe('Compress object', () => {
 	});
 });
 
+describe('Compress bigger object', () => {
+	const dataPattern: any = {
+		"roundTripType": "s",
+		"routes": [
+			{
+				"origin": {
+					"type": "s",
+					"name": {
+						"codeName": "s",
+						"name": {
+							"text": "s"
+						}
+					},
+					"city": {
+						"name": {
+							"text": "s"
+						}
+					},
+					"country": {
+						"name": {
+							"text": "s"
+						}
+					}
+				},
+				"destination": {
+					"type": "s",
+					"name": {
+						"codeName": "s",
+						"name": {
+							"text": "s"
+						}
+					},
+					"city": {
+						"name": {
+							"text": "s"
+						}
+					},
+					"country": {
+						"name": {
+							"text": "s"
+						}
+					}
+				},
+				"departDate": {
+					"date": "sdate",
+					"date2": new Date,
+				}
+			},
+		],
+		"directOnly": false,
+		"transports": [
+			"s"
+		],
+		"tripClass": "s",
+		"passengers": [
+			{
+				"type": "s"
+			}
+		],
+		"userIpAddress": "s",
+		"un": "s",
+	};
+	const data: any = {
+		"roundTripType": "RETURN",
+		"routes": [
+			{
+				"origin": {
+					"type": "AIRPORT",
+					"name": {
+						"codeName": "AAH",
+						"name": {
+							"text": "Aachen/Merzbruck"
+						}
+					},
+					"city": {
+						"name": {
+							"text": "Aachen"
+						}
+					},
+					"country": {
+						"name": {
+							"text": "Germany"
+						}
+					}
+				},
+				"destination": {
+					"type": "AIRPORT",
+					"name": {
+						"codeName": "AAL",
+						"name": {
+							"text": "Aalborg Airport"
+						}
+					},
+					"city": {
+						"name": {
+							"text": "Aalborg"
+						}
+					},
+					"country": {
+						"name": {
+							"text": "Denmark"
+						}
+					}
+				},
+				"departDate": {
+					"date": "2018-03-24T23:00:00.000Z",
+					"date2": new Date,
+				}
+			},
+		],
+		"directOnly": false,
+		"transports": [
+			"AIRPLANE"
+		],
+		"tripClass": "ECONOMY",
+		"passengers": [
+			{
+				"type": "ADULT"
+			}
+		],
+		"userIpAddress": "127.0.0.1",
+		"un": "0.2342",
+	};
+	const commonTexts: string[] = [
+		`"127.0.0.1",`,
+		`RETURN`,
+		`ONE_WAY`,
+		`MULTI_TRIP`,
+		`AIRPLANE`,
+		`AIRPORT`,
+		`ECONOMY`,
+		`BUSINESS`,
+		`ADULT`,
+		`CHILD`,
+		`INFANT`,
+		`Airport`,
+		`airport`,
+		`International`,
+		`international`,
+		`United`,
+	];
+	const myCompressor = new DynaObjectCompress(dataPattern, commonTexts);
+	let stringifiedObject: string = JSON.stringify(data);
+	let compressedText: string;
+
+	it('should compress', () => {
+		compressedText = myCompressor.compress(data);
+		expect(compressedText.length < stringifiedObject.length).toBe(true);
+		console.log('compressed text', compressedText);
+		console.log('original size', stringifiedObject.length, 'compressed size', compressedText.length);
+		console.log('compressed size', (100 * compressedText.length / stringifiedObject.length), 'of original');
+	});
+
+	it('should not contain property names', () => {
+		expect(compressedText.indexOf('name')).toBe(-1);
+		expect(compressedText.indexOf('routes')).toBe(-1);
+		expect(compressedText.indexOf('date2')).toBe(-1);
+	});
+
+	it('should not contain common texts', () => {
+		expect(compressedText.indexOf('ADULT')).toBe(-1);
+		expect(compressedText.indexOf('BUSINESS')).toBe(-1);
+	});
+
+	it('should decompress', () => {
+		const decompressResult: IDecompressObjectResult = myCompressor.decompress(compressedText);
+		expect(decompressResult.errors.length).toBe(0);
+		expect(decompressResult.obj.userIpAddress).toBe("127.0.0.1");
+		expect(decompressResult.obj.un).toBe("0.2342");
+	});
+});
+
 describe('Compress object by version', () => {
 	const dataPatternV1: any = {
 		firstName: "s",

@@ -6,12 +6,29 @@ export interface IDecompressTextResult {
 export class DynaTextCompress {
 	constructor(private  commonTexts: string[], forEncode: boolean = true, private compressSymbol: string = "!") {
 		this.commonTexts = commonTexts.concat();
-		this.commonTexts.unshift(this.compressSymbol);
-		if (forEncode) this.commonTexts.push(" ");
+		if (forEncode) this.commonTexts = this.commonTexts.concat([
+			' ',
+			'`',
+			'"',
+			',',
+			';',
+			'{',
+			'},',
+			'}',
+			'[',
+			']',
+			'/',
+			'\\',
+			'\n',
+			'\r',
+			'\t',
+		]);
 		this.commonTexts =
 			this.commonTexts
-				.sort((aText: string, bText: string) => aText.length - bText.length)
+				.filter((text: string) => text !== compressSymbol)
+				.sort((textA: string, textB: string) => textA.length - textB.length)
 				.reverse();
+		this.commonTexts.unshift(this.compressSymbol);
 	}
 
 	public compress(text: string): string {
