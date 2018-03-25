@@ -37,7 +37,15 @@ export class DynaObjectCompress {
 		let obj: any;
 		let result: IDecompressTextResult = this.textCompressor.decompress(compressed);
 		if (result.errors.length === 0) {
-			obj = JSON.parse(result.text);
+			try {
+				obj = JSON.parse(result.text);
+			}
+			catch (err) {
+				return {
+					obj: undefined,
+					errors: result.errors.concat("Cannot parse to obj"),
+				}
+			}
 		}
 		return {
 			obj,
