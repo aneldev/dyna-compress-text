@@ -64,8 +64,6 @@ export class DynaObjectCompress {
 			else if (Array.isArray(obj)) obj.forEach(_getProperties);
 			else if (typeof obj === "object") {
 				commonTexts = commonTexts.concat(Object.keys(obj).map((key: string) => {
-					debugger;
-					if (key==="date2") debugger;
 					if (Array.isArray(obj[key])) return `"${key}":[`;
 					if (obj[key] instanceof Date) return `"${key}":"`;
 					if (typeof obj[key] === "number") return `"${key}":`;
