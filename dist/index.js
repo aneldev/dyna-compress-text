@@ -91,16 +91,13 @@ var DynaObjectCompress = /** @class */ (function () {
         if (compressSymbol === void 0) { compressSymbol = "!"; }
         this.compressSymbol = compressSymbol;
         this.textCompressor = new DynaTextCompress_1.DynaTextCompress(this.getCommonTexts(objectPattern, commonTexts)
-            .concat(forEncode ? [
+            .concat("true", "true,", "false", "false,", ':00:00.000Z"', forEncode ? [
             '",',
-            '{',
-            '"},',
-            '},',
-            '}',
-            '[',
-            '"],',
             '],',
-            '}',
+            '"},',
+            '"}',
+            '"],',
+            '"]',
         ] : []), forEncode, compressSymbol);
     }
     DynaObjectCompress.prototype.compress = function (obj) {
@@ -110,7 +107,15 @@ var DynaObjectCompress = /** @class */ (function () {
         var obj;
         var result = this.textCompressor.decompress(compressed);
         if (result.errors.length === 0) {
-            obj = JSON.parse(result.text);
+            try {
+                obj = JSON.parse(result.text);
+            }
+            catch (err) {
+                return {
+                    obj: undefined,
+                    errors: result.errors.concat("Cannot parse to obj"),
+                };
+            }
         }
         return {
             obj: obj,
@@ -128,11 +133,20 @@ var DynaObjectCompress = /** @class */ (function () {
                 obj.forEach(_getProperties);
             else if (typeof obj === "object") {
                 commonTexts = commonTexts.concat(Object.keys(obj).map(function (key) {
+                    debugger;
+                    if (key === "date2")
+                        debugger;
                     if (Array.isArray(obj[key]))
                         return "\"" + key + "\":[";
-                    if (typeof obj[key] !== "number")
+                    if (obj[key] instanceof Date)
                         return "\"" + key + "\":\"";
-                    return "\"" + key + "\":";
+                    if (typeof obj[key] === "number")
+                        return "\"" + key + "\":";
+                    if (typeof obj[key] === "boolean")
+                        return "\"" + key + "\":";
+                    if (typeof obj[key] === "object")
+                        return "\"" + key + "\":{";
+                    return "\"" + key + "\":\"";
                 }));
                 Object.keys(obj).forEach(function (key) { return _getProperties(obj[key]); });
             }
@@ -167,13 +181,30 @@ var DynaTextCompress = /** @class */ (function () {
         this.commonTexts = commonTexts;
         this.compressSymbol = compressSymbol;
         this.commonTexts = commonTexts.concat();
-        this.commonTexts.unshift(this.compressSymbol);
         if (forEncode)
-            this.commonTexts.push(" ");
+            this.commonTexts = this.commonTexts.concat([
+                ' ',
+                '`',
+                '"',
+                ',',
+                ';',
+                '{',
+                '},',
+                '}',
+                '[',
+                ']',
+                '/',
+                '\\',
+                '\n',
+                '\r',
+                '\t',
+            ]);
         this.commonTexts =
             this.commonTexts
-                .sort(function (aText, bText) { return aText.length - bText.length; })
+                .filter(function (text) { return text !== compressSymbol; })
+                .sort(function (textA, textB) { return textA.length - textB.length; })
                 .reverse();
+        this.commonTexts.unshift(this.compressSymbol);
     }
     DynaTextCompress.prototype.compress = function (text) {
         var output = '';
