@@ -1,8 +1,8 @@
 import {
 	DynaTextCompress, IDecompressTextResult,
 	DynaObjectCompress, IDecompressObjectResult,
+	DynaObjectCompressVersion,
 } from "../../src";
-import {DynaObjectCompressVersion} from "../../src/DynaObjectCompressVersion";
 
 declare let jest: any, describe: any, expect: any, it: any;
 

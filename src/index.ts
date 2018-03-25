@@ -7,3 +7,7 @@ export {
 	DynaObjectCompress,
 	IDecompressObjectResult,
 } from "./DynaObjectCompress";
+
+export {
+	DynaObjectCompressVersion,
+} from "./DynaObjectCompressVersion";
