@@ -26,6 +26,7 @@ export class DynaTextCompress {
 		this.commonTexts =
 			this.commonTexts
 				.filter((text: string) => text !== compressSymbol)
+				.filter((text: string) => !!text)
 				.sort((textA: string, textB: string) => textA.length - textB.length)
 				.reverse();
 		this.commonTexts.unshift(this.compressSymbol);
@@ -34,7 +35,7 @@ export class DynaTextCompress {
 	public compress(text: string): string {
 		let output: string = '';
 		for (let iChar: number = 0; iChar < text.length; iChar++) {
-			let code = this.getCode(text.substr(iChar));
+			let code = this.encode(text.substr(iChar));
 			if (code) {
 				output += code;
 				iChar += (this.commonTexts[this.decodeIndex(code)]).length - 1;
@@ -69,7 +70,7 @@ export class DynaTextCompress {
 		return output;
 	}
 
-	private getCode(partialText: string): string {
+	private encode(partialText: string): string {
 		let output = null;
 		this.commonTexts.forEach((word, index) => {
 			if (output) return;
