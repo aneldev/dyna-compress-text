@@ -133,9 +133,6 @@ var DynaObjectCompress = /** @class */ (function () {
                 obj.forEach(_getProperties);
             else if (typeof obj === "object") {
                 commonTexts = commonTexts.concat(Object.keys(obj).map(function (key) {
-                    debugger;
-                    if (key === "date2")
-                        debugger;
                     if (Array.isArray(obj[key]))
                         return "\"" + key + "\":[";
                     if (obj[key] instanceof Date)
@@ -202,6 +199,7 @@ var DynaTextCompress = /** @class */ (function () {
         this.commonTexts =
             this.commonTexts
                 .filter(function (text) { return text !== compressSymbol; })
+                .filter(function (text) { return !!text; })
                 .sort(function (textA, textB) { return textA.length - textB.length; })
                 .reverse();
         this.commonTexts.unshift(this.compressSymbol);
@@ -209,7 +207,7 @@ var DynaTextCompress = /** @class */ (function () {
     DynaTextCompress.prototype.compress = function (text) {
         var output = '';
         for (var iChar = 0; iChar < text.length; iChar++) {
-            var code = this.getCode(text.substr(iChar));
+            var code = this.encode(text.substr(iChar));
             if (code) {
                 output += code;
                 iChar += (this.commonTexts[this.decodeIndex(code)]).length - 1;
@@ -243,7 +241,7 @@ var DynaTextCompress = /** @class */ (function () {
         }
         return output;
     };
-    DynaTextCompress.prototype.getCode = function (partialText) {
+    DynaTextCompress.prototype.encode = function (partialText) {
         var _this = this;
         var output = null;
         this.commonTexts.forEach(function (word, index) {
