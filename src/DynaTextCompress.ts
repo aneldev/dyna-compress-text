@@ -4,9 +4,31 @@ export interface IDecompressTextResult {
 }
 
 export class DynaTextCompress {
-	constructor(private  commonTexts: string[], forEncode: boolean = true, private compressSymbol: string = "!") {
-		this.commonTexts = commonTexts.concat();
-		if (forEncode) this.commonTexts = this.commonTexts.concat([
+	private variableChars: string = "";
+
+	constructor(private commonTexts: string[],
+	            private forEncode: boolean = true,
+	            private compressSymbol: string = "!") {
+		this.initVariableChars();
+		this.initCommonTexts();
+	}
+
+	private initVariableChars(): void {
+		const charsSetup: any = [
+			[48, 57],
+			[65, 90],
+			[97, 122],
+			[128, 254],
+		];
+
+		charsSetup.forEach((set) => {
+			for (let i = set[0]; i <= set[1]; i++) this.variableChars += String.fromCharCode(i);
+		});
+	}
+
+	private initCommonTexts(): void {
+		this.commonTexts = this.commonTexts.concat();
+		if (this.forEncode) this.commonTexts = this.commonTexts.concat([
 			' ',
 			'`',
 			'"',
@@ -25,12 +47,11 @@ export class DynaTextCompress {
 		]);
 		this.commonTexts =
 			this.commonTexts
-				.filter((text: string) => text !== compressSymbol)
+				.filter((text: string) => text !== this.compressSymbol)
 				.filter((text: string) => !!text)
 				.sort((textA: string, textB: string) => textA.length - textB.length)
 				.reverse();
 		this.commonTexts.unshift(this.compressSymbol);
-		this.createChars();
 	}
 
 	public compress(text: string): string {
@@ -71,23 +92,7 @@ export class DynaTextCompress {
 		return output;
 	}
 
-	// ---------- internals
-
-	private variableChars: string = "";
-
-	private createChars(): void {
-		const charsSetup: any = [
-			[48, 57],
-			[65, 90],
-			[97, 122],
-			[128, 254],
-		];
-
-		charsSetup.forEach((set) => {
-			for (let i = set[0]; i <= set[1]; i++) this.variableChars += String.fromCharCode(i);
-		});
-	}
-
+	// encode a part from the partial text to compressedBlock
 	private encode(partialText: string): string {
 		let output = null;
 		this.commonTexts.forEach((word, index) => {
@@ -99,6 +104,7 @@ export class DynaTextCompress {
 		return output;
 	}
 
+	// convert the index of the commonTexts to compressedBlock
 	private encodeIndex(variableIndex: number): string {
 		let variableChar: string;
 		if (variableIndex < this.variableChars.length) {
@@ -110,6 +116,7 @@ export class DynaTextCompress {
 		return this.compressSymbol + variableChar;
 	}
 
+	// convert a compressedBlock to index (of the commonsTexts)
 	private decodeIndex(compressedBlock: string): number {
 		let variableIndex: number = compressedBlock.charCodeAt(1);
 		let indexInVariableChars: number = this.variableChars.indexOf(String.fromCharCode(variableIndex));
@@ -120,7 +127,6 @@ export class DynaTextCompress {
 			return variableIndex - 256;
 		}
 	}
-
 }
 
 

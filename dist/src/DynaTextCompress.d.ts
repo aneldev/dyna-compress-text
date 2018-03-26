@@ -4,12 +4,14 @@ export interface IDecompressTextResult {
 }
 export declare class DynaTextCompress {
     private commonTexts;
+    private forEncode;
     private compressSymbol;
+    private variableChars;
     constructor(commonTexts: string[], forEncode?: boolean, compressSymbol?: string);
+    private initVariableChars();
+    private initCommonTexts();
     compress(text: string): string;
     decompress(compressedString: string): IDecompressTextResult;
-    private variableChars;
-    private createChars();
     private encode(partialText);
     private encodeIndex(variableIndex);
     private decodeIndex(compressedBlock);
