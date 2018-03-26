@@ -7,8 +7,10 @@ export declare class DynaTextCompress {
     private compressSymbol;
     constructor(commonTexts: string[], forEncode?: boolean, compressSymbol?: string);
     compress(text: string): string;
-    decompress(compressed: string): IDecompressTextResult;
+    decompress(compressedString: string): IDecompressTextResult;
+    private variableChars;
+    private createChars();
     private encode(partialText);
-    private encodeIndex(index);
-    private decodeIndex(text);
+    private encodeIndex(variableIndex);
+    private decodeIndex(compressedBlock);
 }

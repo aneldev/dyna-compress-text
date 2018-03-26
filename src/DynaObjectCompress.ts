@@ -33,20 +33,10 @@ export class DynaObjectCompress {
 
 	public compress(obj: any): string {
 		let output: string = this.textCompressor.compress(JSON.stringify(obj));
-		if (this.forEncode) {
-			output = output
-				.replace(/\//g, '_ax5013')
-				.replace(/!\\/g, '_bx5013');
-		}
 		return output;
 	}
 
 	public decompress(compressed: string): IDecompressObjectResult {
-		if (this.forEncode) {
-			compressed = compressed
-				.replace("_ax5013", '/')
-				.replace("_bx5013", '!\\');
-		}
 		let obj: any;
 		let result: IDecompressTextResult = this.textCompressor.decompress(compressed);
 		if (result.errors.length === 0) {
