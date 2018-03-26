@@ -106,7 +106,7 @@ describe('Compress small text (stringified object)', () => {
 		compressedText = myCompressor.compress(stringifiedObject);
 		expect(compressedText.length < stringifiedObject.length).toBe(true);
 		console.log('compressed text', compressedText);
-		console.log('original size', stringifiedObject.length, 'compressed size', compressedText.length);
+		console.log('original size', stringifiedObject.length, 'compressed size', compressedText.length, 'encoded compressed size', encodeURI(compressedText).length);
 		console.log('compressed size', (100 * compressedText.length / stringifiedObject.length), 'of original');
 	});
 
@@ -152,7 +152,7 @@ describe('Compress object', () => {
 		compressedText = myCompressor.compress(data);
 		expect(compressedText.length < stringifiedObject.length).toBe(true);
 		console.log('compressed text', compressedText);
-		console.log('original size', stringifiedObject.length, 'compressed size', compressedText.length);
+		console.log('original size', stringifiedObject.length, 'compressed size', compressedText.length, 'encoded compressed size', encodeURI(compressedText).length);
 		console.log('compressed size', (100 * compressedText.length / stringifiedObject.length), 'of original');
 	});
 
@@ -175,128 +175,8 @@ describe('Compress object', () => {
 });
 
 describe('Compress bigger object', () => {
-	const dataPattern: any = {
-		"roundTripType": "s",
-		"routes": [
-			{
-				"origin": {
-					"type": "s",
-					"name": {
-						"codeName": "s",
-						"name": {
-							"text": "s"
-						}
-					},
-					"city": {
-						"name": {
-							"text": "s"
-						}
-					},
-					"country": {
-						"name": {
-							"text": "s"
-						}
-					}
-				},
-				"destination": {
-					"type": "s",
-					"name": {
-						"codeName": "s",
-						"name": {
-							"text": "s"
-						}
-					},
-					"city": {
-						"name": {
-							"text": "s"
-						}
-					},
-					"country": {
-						"name": {
-							"text": "s"
-						}
-					}
-				},
-				"departDate": {
-					"date": "sdate",
-					"date2": new Date,
-				}
-			},
-		],
-		"directOnly": false,
-		"transports": [
-			"s"
-		],
-		"tripClass": "s",
-		"passengers": [
-			{
-				"type": "s"
-			}
-		],
-		"userIpAddress": "s",
-		"un": "s",
-	};
-	const data: any = {
-		"roundTripType": "RETURN",
-		"routes": [
-			{
-				"origin": {
-					"type": "AIRPORT",
-					"name": {
-						"codeName": "AAH",
-						"name": {
-							"text": "Aachen/Merzbruck"
-						}
-					},
-					"city": {
-						"name": {
-							"text": "Aachen"
-						}
-					},
-					"country": {
-						"name": {
-							"text": "Germany"
-						}
-					}
-				},
-				"destination": {
-					"type": "AIRPORT",
-					"name": {
-						"codeName": "AAL",
-						"name": {
-							"text": "Aalborg Airport"
-						}
-					},
-					"city": {
-						"name": {
-							"text": "Aalborg"
-						}
-					},
-					"country": {
-						"name": {
-							"text": "Denmark"
-						}
-					}
-				},
-				"departDate": {
-					"date": "2018-03-24T23:00:00.000Z",
-					"date2": new Date,
-				}
-			},
-		],
-		"directOnly": false,
-		"transports": [
-			"AIRPLANE"
-		],
-		"tripClass": "ECONOMY",
-		"passengers": [
-			{
-				"type": "ADULT"
-			}
-		],
-		"userIpAddress": "127.0.0.1",
-		"un": "0.2342",
-	};
+	const dataPattern: any = {"roundTripType":"RETURN","routes":[{"origin":{"type":"AIRPORT","name":{"codeName":"VIE","name":{"text":"Vienna International Airport"}},"city":{"name":{"text":"Vienna"}},"country":{"name":{"text":"Austria"}}},"destination":{"type":"AIRPORT","name":{"codeName":"LAX","name":{"text":"Los Angeles International Airport"}},"city":{"name":{"text":"Los Angeles"}},"country":{"name":{"text":"United States"}}},"departDate":{"date":"2018-03-29T22:00:00.000Z"}},{"origin":{"type":"AIRPORT","name":{"codeName":"LAX","name":{"text":"Los Angeles International Airport"}},"city":{"name":{"text":"Los Angeles"}},"country":{"name":{"text":"United States"}}},"destination":{"type":"AIRPORT","name":{"codeName":"VIE","name":{"text":"Vienna International Airport"}},"city":{"name":{"text":"Vienna"}},"country":{"name":{"text":"Austria"}}},"departDate":{"date":"2018-03-31T22:00:00.000Z"}}],"directOnly":false,"transports":["AIRPLANE"],"tripClass":"ECONOMY","passengers":[{"type":"ADULT"}],"userIpAddress":"127.0.0.1","un":"0.69791"};
+	const data: any = {"roundTripType":"RETURN","routes":[{"origin":{"type":"AIRPORT","name":{"codeName":"VIE","name":{"text":"Vienna International Airport"}},"city":{"name":{"text":"Vienna"}},"country":{"name":{"text":"Austria"}}},"destination":{"type":"AIRPORT","name":{"codeName":"LAX","name":{"text":"Los Angeles International Airport"}},"city":{"name":{"text":"Los Angeles"}},"country":{"name":{"text":"United States"}}},"departDate":{"date":"2018-03-29T22:00:00.000Z"}},{"origin":{"type":"AIRPORT","name":{"codeName":"LAX","name":{"text":"Los Angeles International Airport"}},"city":{"name":{"text":"Los Angeles"}},"country":{"name":{"text":"United States"}}},"destination":{"type":"AIRPORT","name":{"codeName":"VIE","name":{"text":"Vienna International Airport"}},"city":{"name":{"text":"Vienna"}},"country":{"name":{"text":"Austria"}}},"departDate":{"date":"2018-03-31T22:00:00.000Z"}}],"directOnly":false,"transports":["AIRPLANE"],"tripClass":"ECONOMY","passengers":[{"type":"ADULT"}],"userIpAddress":"127.0.0.1","un":"0.69791"};
 	const commonTexts: string[] = [
 		`"127.0.0.1",`,
 		`RETURN`,
@@ -323,7 +203,7 @@ describe('Compress bigger object', () => {
 		compressedText = myCompressor.compress(data);
 		expect(compressedText.length < stringifiedObject.length).toBe(true);
 		console.log('compressed text', compressedText);
-		console.log('original size', stringifiedObject.length, 'compressed size', compressedText.length);
+		console.log('original size', stringifiedObject.length, 'compressed size', compressedText.length, 'encoded compressed size', encodeURI(compressedText).length);
 		console.log('compressed size', (100 * compressedText.length / stringifiedObject.length), 'of original');
 	});
 
@@ -338,11 +218,15 @@ describe('Compress bigger object', () => {
 		expect(compressedText.indexOf('BUSINESS')).toBe(-1);
 	});
 
+	it('should not contain the / char', () => {
+		expect(compressedText.indexOf('/')).toBe(-1);
+	});
+
 	it('should decompress', () => {
 		const decompressResult: IDecompressObjectResult = myCompressor.decompress(compressedText);
 		expect(decompressResult.errors.length).toBe(0);
 		expect(decompressResult.obj.userIpAddress).toBe("127.0.0.1");
-		expect(decompressResult.obj.un).toBe("0.2342");
+		expect(decompressResult.obj.un).toBe("0.69791");
 	});
 });
 

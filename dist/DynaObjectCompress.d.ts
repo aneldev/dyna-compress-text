@@ -3,6 +3,7 @@ export interface IDecompressObjectResult {
     errors: string[];
 }
 export declare class DynaObjectCompress {
+    private forEncode;
     private compressSymbol;
     private textCompressor;
     constructor(objectPattern: any, commonTexts?: string[], forEncode?: boolean, compressSymbol?: string);

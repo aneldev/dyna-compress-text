@@ -4,9 +4,31 @@ export interface IDecompressTextResult {
 }
 
 export class DynaTextCompress {
-	constructor(private  commonTexts: string[], forEncode: boolean = true, private compressSymbol: string = "!") {
-		this.commonTexts = commonTexts.concat();
-		if (forEncode) this.commonTexts = this.commonTexts.concat([
+	private variableChars: string = "";
+
+	constructor(private commonTexts: string[],
+	            private forEncode: boolean = true,
+	            private compressSymbol: string = "!") {
+		this.initVariableChars();
+		this.initCommonTexts();
+	}
+
+	private initVariableChars(): void {
+		const charsSetup: any = [
+			[48, 57],
+			[65, 90],
+			[97, 122],
+			[128, 254],
+		];
+
+		charsSetup.forEach((set) => {
+			for (let i = set[0]; i <= set[1]; i++) this.variableChars += String.fromCharCode(i);
+		});
+	}
+
+	private initCommonTexts(): void {
+		this.commonTexts = this.commonTexts.concat();
+		if (this.forEncode) this.commonTexts = this.commonTexts.concat([
 			' ',
 			'`',
 			'"',
@@ -25,7 +47,7 @@ export class DynaTextCompress {
 		]);
 		this.commonTexts =
 			this.commonTexts
-				.filter((text: string) => text !== compressSymbol)
+				.filter((text: string) => text !== this.compressSymbol)
 				.filter((text: string) => !!text)
 				.sort((textA: string, textB: string) => textA.length - textB.length)
 				.reverse();
@@ -35,10 +57,10 @@ export class DynaTextCompress {
 	public compress(text: string): string {
 		let output: string = '';
 		for (let iChar: number = 0; iChar < text.length; iChar++) {
-			let code = this.encode(text.substr(iChar));
-			if (code) {
-				output += code;
-				iChar += (this.commonTexts[this.decodeIndex(code)]).length - 1;
+			let compressedBlock = this.encode(text.substr(iChar));
+			if (compressedBlock) {
+				output += compressedBlock;
+				iChar += (this.commonTexts[this.decodeIndex(compressedBlock)]).length - 1;
 			} else {
 				output += text[iChar];
 			}
@@ -46,30 +68,31 @@ export class DynaTextCompress {
 		return output;
 	}
 
-	public decompress(compressed: string): IDecompressTextResult {
+	public decompress(compressedString: string): IDecompressTextResult {
 		let output: IDecompressTextResult = {
 			text: '',
 			errors: [],
 		};
-		for (let iChar = 0; iChar < compressed.length; iChar++) {
-			if (compressed[iChar] === this.compressSymbol) {
-				const compressedSymbol = compressed.substr(iChar, 2);
-				let decodedText = this.commonTexts[this.decodeIndex(compressedSymbol)];
+		for (let iChar = 0; iChar < compressedString.length; iChar++) {
+			if (compressedString[iChar] === this.compressSymbol) {
+				const compressedBlock = compressedString.substr(iChar, 2);
+				let decodedText = this.commonTexts[this.decodeIndex(compressedBlock)];
 				if (decodedText) {
 					output.text += decodedText;
 				}
 				else {
-					output.errors.push(`Symbol [${compressedSymbol}] in unknown`);
+					output.errors.push(`Symbol [${compressedBlock}] in unknown`);
 				}
 				iChar += 1;
 			}
 			else {
-				output.text += compressed[iChar];
+				output.text += compressedString[iChar];
 			}
 		}
 		return output;
 	}
 
+	// encode a part from the partial text to compressedBlock
 	private encode(partialText: string): string {
 		let output = null;
 		this.commonTexts.forEach((word, index) => {
@@ -81,14 +104,29 @@ export class DynaTextCompress {
 		return output;
 	}
 
-	private encodeIndex(index: number): string {
-		return this.compressSymbol + String.fromCharCode(65 + index);
+	// convert the index of the commonTexts to compressedBlock
+	private encodeIndex(variableIndex: number): string {
+		let variableChar: string;
+		if (variableIndex < this.variableChars.length) {
+			variableChar = this.variableChars[variableIndex];
+		}
+		else {
+			variableChar = String.fromCharCode(256 + variableIndex);
+		}
+		return this.compressSymbol + variableChar;
 	}
 
-	private decodeIndex(text: string): number {
-		return text.charCodeAt(1) - 65;
+	// convert a compressedBlock to index (of the commonsTexts)
+	private decodeIndex(compressedBlock: string): number {
+		let variableIndex: number = compressedBlock.charCodeAt(1);
+		let indexInVariableChars: number = this.variableChars.indexOf(String.fromCharCode(variableIndex));
+		if (indexInVariableChars > -1) {
+			return indexInVariableChars;
+		}
+		else {
+			return variableIndex - 256;
+		}
 	}
-
 }
 
 
