@@ -89,6 +89,7 @@ var DynaObjectCompress = /** @class */ (function () {
         if (commonTexts === void 0) { commonTexts = []; }
         if (forEncode === void 0) { forEncode = true; }
         if (compressSymbol === void 0) { compressSymbol = "!"; }
+        this.forEncode = forEncode;
         this.compressSymbol = compressSymbol;
         this.textCompressor = new DynaTextCompress_1.DynaTextCompress(this.getCommonTexts(objectPattern, commonTexts)
             .concat("true", "true,", "false", "false,", ':00:00.000Z"', forEncode ? [
@@ -101,9 +102,18 @@ var DynaObjectCompress = /** @class */ (function () {
         ] : []), forEncode, compressSymbol);
     }
     DynaObjectCompress.prototype.compress = function (obj) {
-        return this.textCompressor.compress(JSON.stringify(obj));
+        var output = this.textCompressor.compress(JSON.stringify(obj));
+        if (this.forEncode) {
+            output = output
+                .replace(/\//g, '!ax')
+                .replace(/\\/g, '!ab');
+        }
+        return output;
     };
     DynaObjectCompress.prototype.decompress = function (compressed) {
+        compressed = compressed
+            .replace("!ax", '/')
+            .replace("!ab", '\\');
         var obj;
         var result = this.textCompressor.decompress(compressed);
         if (result.errors.length === 0) {
