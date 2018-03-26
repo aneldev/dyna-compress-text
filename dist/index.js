@@ -103,17 +103,9 @@ var DynaObjectCompress = /** @class */ (function () {
     }
     DynaObjectCompress.prototype.compress = function (obj) {
         var output = this.textCompressor.compress(JSON.stringify(obj));
-        if (this.forEncode) {
-            output = output
-                .replace(/\//g, '!ax')
-                .replace(/\\/g, '!ab');
-        }
         return output;
     };
     DynaObjectCompress.prototype.decompress = function (compressed) {
-        compressed = compressed
-            .replace("!ax", '/')
-            .replace("!ab", '\\');
         var obj;
         var result = this.textCompressor.decompress(compressed);
         if (result.errors.length === 0) {
@@ -186,9 +178,29 @@ var DynaTextCompress = /** @class */ (function () {
         if (forEncode === void 0) { forEncode = true; }
         if (compressSymbol === void 0) { compressSymbol = "!"; }
         this.commonTexts = commonTexts;
+        this.forEncode = forEncode;
         this.compressSymbol = compressSymbol;
-        this.commonTexts = commonTexts.concat();
-        if (forEncode)
+        this.variableChars = "";
+        this.initVariableChars();
+        this.initCommonTexts();
+    }
+    DynaTextCompress.prototype.initVariableChars = function () {
+        var _this = this;
+        var charsSetup = [
+            [48, 57],
+            [65, 90],
+            [97, 122],
+            [128, 254],
+        ];
+        charsSetup.forEach(function (set) {
+            for (var i = set[0]; i <= set[1]; i++)
+                _this.variableChars += String.fromCharCode(i);
+        });
+    };
+    DynaTextCompress.prototype.initCommonTexts = function () {
+        var _this = this;
+        this.commonTexts = this.commonTexts.concat();
+        if (this.forEncode)
             this.commonTexts = this.commonTexts.concat([
                 ' ',
                 '`',
@@ -208,19 +220,19 @@ var DynaTextCompress = /** @class */ (function () {
             ]);
         this.commonTexts =
             this.commonTexts
-                .filter(function (text) { return text !== compressSymbol; })
+                .filter(function (text) { return text !== _this.compressSymbol; })
                 .filter(function (text) { return !!text; })
                 .sort(function (textA, textB) { return textA.length - textB.length; })
                 .reverse();
         this.commonTexts.unshift(this.compressSymbol);
-    }
+    };
     DynaTextCompress.prototype.compress = function (text) {
         var output = '';
         for (var iChar = 0; iChar < text.length; iChar++) {
-            var code = this.encode(text.substr(iChar));
-            if (code) {
-                output += code;
-                iChar += (this.commonTexts[this.decodeIndex(code)]).length - 1;
+            var compressedBlock = this.encode(text.substr(iChar));
+            if (compressedBlock) {
+                output += compressedBlock;
+                iChar += (this.commonTexts[this.decodeIndex(compressedBlock)]).length - 1;
             }
             else {
                 output += text[iChar];
@@ -228,29 +240,30 @@ var DynaTextCompress = /** @class */ (function () {
         }
         return output;
     };
-    DynaTextCompress.prototype.decompress = function (compressed) {
+    DynaTextCompress.prototype.decompress = function (compressedString) {
         var output = {
             text: '',
             errors: [],
         };
-        for (var iChar = 0; iChar < compressed.length; iChar++) {
-            if (compressed[iChar] === this.compressSymbol) {
-                var compressedSymbol = compressed.substr(iChar, 2);
-                var decodedText = this.commonTexts[this.decodeIndex(compressedSymbol)];
+        for (var iChar = 0; iChar < compressedString.length; iChar++) {
+            if (compressedString[iChar] === this.compressSymbol) {
+                var compressedBlock = compressedString.substr(iChar, 2);
+                var decodedText = this.commonTexts[this.decodeIndex(compressedBlock)];
                 if (decodedText) {
                     output.text += decodedText;
                 }
                 else {
-                    output.errors.push("Symbol [" + compressedSymbol + "] in unknown");
+                    output.errors.push("Symbol [" + compressedBlock + "] in unknown");
                 }
                 iChar += 1;
             }
             else {
-                output.text += compressed[iChar];
+                output.text += compressedString[iChar];
             }
         }
         return output;
     };
+    // encode a part from the partial text to compressedBlock
     DynaTextCompress.prototype.encode = function (partialText) {
         var _this = this;
         var output = null;
@@ -263,11 +276,27 @@ var DynaTextCompress = /** @class */ (function () {
         });
         return output;
     };
-    DynaTextCompress.prototype.encodeIndex = function (index) {
-        return this.compressSymbol + String.fromCharCode(65 + index);
+    // convert the index of the commonTexts to compressedBlock
+    DynaTextCompress.prototype.encodeIndex = function (variableIndex) {
+        var variableChar;
+        if (variableIndex < this.variableChars.length) {
+            variableChar = this.variableChars[variableIndex];
+        }
+        else {
+            variableChar = String.fromCharCode(256 + variableIndex);
+        }
+        return this.compressSymbol + variableChar;
     };
-    DynaTextCompress.prototype.decodeIndex = function (text) {
-        return text.charCodeAt(1) - 65;
+    // convert a compressedBlock to index (of the commonsTexts)
+    DynaTextCompress.prototype.decodeIndex = function (compressedBlock) {
+        var variableIndex = compressedBlock.charCodeAt(1);
+        var indexInVariableChars = this.variableChars.indexOf(String.fromCharCode(variableIndex));
+        if (indexInVariableChars > -1) {
+            return indexInVariableChars;
+        }
+        else {
+            return variableIndex - 256;
+        }
     };
     return DynaTextCompress;
 }());
