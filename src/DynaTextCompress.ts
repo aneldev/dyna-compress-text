@@ -26,6 +26,11 @@ export class DynaTextCompress {
 		});
 	}
 
+	private textToCode(text: string): string {
+		return text.split('').map((c: string) => c.charCodeAt(0)).join('-');
+	}
+
+
 	private initCommonTexts(): void {
 		this.commonTexts = this.commonTexts.concat();
 		if (this.forEncode) this.commonTexts = this.commonTexts.concat([
@@ -49,7 +54,18 @@ export class DynaTextCompress {
 			this.commonTexts
 				.filter((text: string) => text !== this.compressSymbol)
 				.filter((text: string) => !!text)
-				.sort((textA: string, textB: string) => textA.length - textB.length)
+				// group them by length
+				.reduce((acc: Array<Array<string>>, v: string) => {
+					if (!acc[v.length]) acc[v.length] = [];
+					acc[v.length].push(v);
+					return acc;
+				}, [])
+				// sort each group converting to codes (each environment sorts strings differently)
+				.map((group: Array<string>) => {
+					return group.sort((textA, textB) => this.textToCode(textA).localeCompare(this.textToCode(textB)));
+				})
+				// merge the groups
+				.reduce((acc: Array<string>, group: Array<string>) => acc.concat(group), [])
 				.reverse();
 		this.commonTexts.unshift(this.compressSymbol);
 	}

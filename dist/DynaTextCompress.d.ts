@@ -9,6 +9,7 @@ export declare class DynaTextCompress {
     private variableChars;
     constructor(commonTexts: string[], forEncode?: boolean, compressSymbol?: string);
     private initVariableChars();
+    private textToCode(text);
     private initCommonTexts();
     compress(text: string): string;
     decompress(compressedString: string): IDecompressTextResult;

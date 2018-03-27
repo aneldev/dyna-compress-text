@@ -82,9 +82,7 @@ export class DynaObjectCompress {
 			.reduce((acc: string[], text: string) => {
 				if (acc.indexOf(text) === -1) acc.push(text);
 				return acc;
-			}, [])
-			.sort((aText: string, bText: string) => aText.length - bText.length)
-			.reverse();
+			}, []);
 	}
 }
 

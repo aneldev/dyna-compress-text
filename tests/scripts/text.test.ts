@@ -13,8 +13,6 @@ describe('Compress Lorem ipsum text', () => {
 	let decompressedResult: IDecompressTextResult;
 
 	it('should compress', () => {
-		console.debug('cccc',compressText);
-		debugger;
 		compressedText = compressor.compress(compressText);
 		expect(compressedText.length < compressText.length).toBe(true);
 		console.log('original text', compressText);

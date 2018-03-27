@@ -157,9 +157,7 @@ var DynaObjectCompress = /** @class */ (function () {
             if (acc.indexOf(text) === -1)
                 acc.push(text);
             return acc;
-        }, [])
-            .sort(function (aText, bText) { return aText.length - bText.length; })
-            .reverse();
+        }, []);
     };
     return DynaObjectCompress;
 }());
@@ -197,6 +195,9 @@ var DynaTextCompress = /** @class */ (function () {
                 _this.variableChars += String.fromCharCode(i);
         });
     };
+    DynaTextCompress.prototype.textToCode = function (text) {
+        return text.split('').map(function (c) { return c.charCodeAt(0); }).join('-');
+    };
     DynaTextCompress.prototype.initCommonTexts = function () {
         var _this = this;
         this.commonTexts = this.commonTexts.concat();
@@ -222,7 +223,16 @@ var DynaTextCompress = /** @class */ (function () {
             this.commonTexts
                 .filter(function (text) { return text !== _this.compressSymbol; })
                 .filter(function (text) { return !!text; })
-                .sort(function (textA, textB) { return textA.length - textB.length; })
+                .reduce(function (acc, v) {
+                if (!acc[v.length])
+                    acc[v.length] = [];
+                acc[v.length].push(v);
+                return acc;
+            }, [])
+                .map(function (group) {
+                return group.sort(function (textA, textB) { return _this.textToCode(textA).localeCompare(_this.textToCode(textB)); });
+            })
+                .reduce(function (acc, group) { return acc.concat(group); }, [])
                 .reverse();
         this.commonTexts.unshift(this.compressSymbol);
     };
@@ -245,6 +255,7 @@ var DynaTextCompress = /** @class */ (function () {
             text: '',
             errors: [],
         };
+        debugger; // todo: 180327, check the this.commonTexts to have the same sequence accross all browsers!
         for (var iChar = 0; iChar < compressedString.length; iChar++) {
             if (compressedString[iChar] === this.compressSymbol) {
                 var compressedBlock = compressedString.substr(iChar, 2);
