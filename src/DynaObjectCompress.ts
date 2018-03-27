@@ -1,8 +1,9 @@
 import {DynaTextCompress, IDecompressTextResult} from "./DynaTextCompress";
 
 export interface IDecompressObjectResult {
-	obj: any,
-	errors: string[]
+	obj: any;
+	errors: string[];
+	_debug?: any;
 }
 
 export class DynaObjectCompress {
@@ -47,6 +48,10 @@ export class DynaObjectCompress {
 				return {
 					obj: undefined,
 					errors: result.errors.concat("Cannot parse to obj"),
+					_debug: {
+						compressed,
+						decompressedText: result.text,
+					}
 				}
 			}
 		}

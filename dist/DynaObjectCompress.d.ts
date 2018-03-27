@@ -1,6 +1,7 @@
 export interface IDecompressObjectResult {
     obj: any;
     errors: string[];
+    _debug?: any;
 }
 export declare class DynaObjectCompress {
     private forEncode;
