@@ -118,7 +118,7 @@ var DynaObjectCompress = /** @class */ (function () {
                     errors: result.errors.concat("Cannot parse to obj"),
                     _debug: {
                         compressed: compressed,
-                        decopressedText: result.text,
+                        decompressedText: result.text,
                     }
                 };
             }
