@@ -1,6 +1,6 @@
 {
   "name": "dyna-compress-text",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "Compress strings and objects learning the compressor how to do that.",
   "repository": {
     "type": "git",
