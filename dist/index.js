@@ -255,7 +255,6 @@ var DynaTextCompress = /** @class */ (function () {
             text: '',
             errors: [],
         };
-        debugger; // todo: 180327, check the this.commonTexts to have the same sequence accross all browsers!
         for (var iChar = 0; iChar < compressedString.length; iChar++) {
             if (compressedString[iChar] === this.compressSymbol) {
                 var compressedBlock = compressedString.substr(iChar, 2);
